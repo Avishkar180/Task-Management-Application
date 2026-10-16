@@ -1,6 +1,7 @@
 from src.tasks.dtos import TaskSchema
 from sqlalchemy.orm import Session
 from src.tasks.models import TaskModel
+from fastapi import HTTPException
 
 
 
@@ -12,4 +13,43 @@ def create_task(body:TaskSchema,db:Session):
     db.commit()
     db.refresh(new_task)
 
-    return {"status":"Task Created Sucessfully","data":new_task}
+    return new_task
+
+def get_task(db:Session):
+    tasks=db.query(TaskModel).all()
+    return tasks
+
+def one_task(task_id:int,db:Session):
+    one_task=db.query(TaskModel).get(task_id)
+    if not one_task:
+        raise HTTPException(status_code=404,detail="Task Id is Incorrect")
+
+
+    return{"ststus":"Task fetched Suceesfully","data":one_task}
+
+def update_task(task_id:int,body:TaskSchema,db:Session):
+    one_task=db.query(TaskModel).get(task_id)
+    if not one_task:
+        raise HTTPException(status_code=404, detail="Task id is incorrect")
+
+    task_data = body.model_dump()
+    for field, value in task_data.items():
+        setattr(one_task, field, value)
+
+    db.add(one_task)
+    db.commit()
+    db.refresh(one_task)
+
+    return {"status":"Task Updated Succesfully","data":one_task}
+
+def delete_task(task_id:int,db:Session):
+    one_task=db.query(TaskModel).get(task_id)
+    if not one_task:
+        raise HTTPException(404,detail="Task id is incorrect")    
+    db.delete(one_task)
+    db.commit()
+
+    return None
+
+    
+

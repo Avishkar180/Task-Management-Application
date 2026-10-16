@@ -5,4 +5,8 @@ class TaskSchema(BaseModel):
     title : str
     description : str
     is_completed : bool=False
+
+class Taskresponsescchema(BaseModel):
+    id:int
+    title:str
     
